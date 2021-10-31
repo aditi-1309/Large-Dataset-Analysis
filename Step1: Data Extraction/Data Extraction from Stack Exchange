@@ -1,0 +1,23 @@
+- For the first 50000 dataset - QueryResults 1
+    
+    SELECT DISTINCT * FROM Posts WHERE ViewCount > 100000 ORDER BY VIEWCOUNT DESC
+    
+- For the next 50000 dataset - QueryResults 2
+    
+    SELECT DISTINCT * FROM Posts WHERE ViewCount <= 127402 AND ViewCount > 50000 ORDER BY VIEWCOUNT DESC
+    
+- For the next 50000 dataset - QueryResults 3
+    
+    SELECT DISTINCT * FROM Posts WHERE ViewCount <= 74596 AND ViewCount > 20000 ORDER BY VIEWCOUNT DESC
+    
+- For the next 50000 dataset - QueryResults 4
+    
+    SELECT DISTINCT * FROM Posts WHERE ViewCount <= 53211 AND ViewCount > 10000 ORDER BY VIEWCOUNT DESC
+    
+- For the next 500 dataset - QueryResults 5. **This is to compensate for data duplication**
+    
+    SELECT DISTINCT TOP 500 * FROM Posts WHERE ViewCount <= 41325 AND ViewCount > 10000 ORDER BY VIEWCOUNT DESC
+    
+
+
+Concatenate the 5 CSV files in Excel, remove any duplicates and reduce the data to exactly 200,000 fields to get the precise data.
