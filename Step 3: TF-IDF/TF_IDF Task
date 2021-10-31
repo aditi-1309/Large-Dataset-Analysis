@@ -1,0 +1,55 @@
+#Installing the necessary packages for pyhive
+!pip install sasl
+!pip install thrift
+!pip install thrift-sasl
+!pip install Pyhive
+!pip install tabulate
+
+#PyHive in order to connect and use Hive Data
+from pyhive import hive
+
+#Pandas in order to work with DataFrames
+import pandas as pd
+
+#Connecting to Hive
+connect = hive.Connection(host='localhost',port=10000,username='aditi_bhat2',password='1921918913794740706',database='default',auth='CUSTOM')
+con_var = connect.cursor()
+
+#Executing a Hive Query to fetch data from posts_view 
+con_var.execute('SELECT OwnerUserId, sum(Score) as PostScore FROM posts_db.posts_view WHERE OwnerUserID is not NULL GROUP BY OwnerUserId ORDER BY PostScore DESC LIMIT 10')
+result = con_var.fetchall()
+result
+
+#Adding data into a dataframe using SQL query
+df = pd.read_sql("SELECT DISTINCT(OwnerUserId), OwnerDisplayName, Title, Body FROM posts_db.posts_view WHERE OwnerUserId IN (SELECT OwnerUserId from posts_db.top10users_view) ORDER BY OwnerUserId",connect)
+df.head()
+
+#Concatenating the Title and Body in a new column called 'full_post'
+df["full_post"] = df["title"] +" "+ df["body"]
+
+#Fetching the top 10 users in a list
+top10_users = list(df["owneruserid"].unique())
+
+print(top10_users)
+
+#Importing TdfifVectorizer from ScikitLearn package
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+#Creating a function to remove stop words, getting and adding columns to the top 10 words per user and calculating the TFIDF
+def calculate_tf_idf(df):
+   vect = TfidfVectorizer(stop_words='english', lowercase=True)
+   reply = vect.fit_transform(df["full_post"])                 
+   df_tfidf_skl = pd.DataFrame(reply.toarray(), columns=vect.get_feature_names())
+   Totaltf_idf = df_tfidf_skl.sum(axis = 0)                     
+   Top10_list = Totaltf_idf.nlargest(10)                        
+   Top10_words = list(Top10_list.index)                         
+   df_tfidf_skl[Top10_words]                                    
+   return df_tfidf_skl[Top10_words] 
+   
+#Iterating over top 10 users, using the function to calculate the TFIDF and printing it
+for user in top10_users:                              
+   Filtered_data = df[(df['owneruserid']==user)]      
+   Tfidf_df = calculate_tf_idf(Filtered_data)               
+   print("For Username ID TF/IDF table : "+str(user))
+   Tfidf_df.insert(0, 'OwnerUserId', user)                 
+   display(Tfidf_df)
