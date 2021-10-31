@@ -1,0 +1,35 @@
+CREATE DATABASE posts_db;
+
+USE posts_db
+
+CREATE TABLE IF NOT EXISTS posts_table (
+Id int, PostTypeId tinyint,
+AcceptedAnswerId int, CreationDate timestamp,
+Score int, ViewCount int, OwnerUserId int,
+OwnerDisplayName varchar (40), LastEditorUserId int,
+LastEditorDisplayName varchar (40), LastEdit Date timestamp, › LastActivityDate timestamp, Tags varchar (250),
+AnswerCount int, CommentCount int, FavoriteCount int,
+ClosedDate timestamp, CommunityOwnedDate timestamp,
+ContentLicense varchar 12), Body string, Title varchar (250))
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2. OpenCSVSerde' 
+tblproperties("skip.header.line.count"="1");
+
+LOAD DATA INPATH 'gs://dataproc-staging-europe-west2-818068000141-b9vnutxf/cloud-assign1-aditi/Cleaned_FinalDS.csv' INTO TABLE poststable;
+
+CREATE VIEW IF NOT EXISTS posts_view as select cast(Id as int) as Id, 
+cast(PostTypeId as tinyint) as PostTypeId, AcceptedAnswerId , 
+CreationDate , cast(Score as int) as Score, cast(ViewCount
+as int) as ViewCount, Body, cast(OwnerUserId as int), 
+OwnerDisplayName, LastEditorUserId, LastEditorDisplayName , LastEditDate , 
+LastActivityDate , Title , Tags , AnswerCount , CommentCount , Fav
+oriteCount , ClosedDate , CommunityOwnedDate , ContentLicense from posts_table;
+
+2.2.1: SELECT Id, ViewCount, Score, Title FROM posts_view ORDER BY Score DESC LIMIT 10
+
+2.2.2: SELECT OwnerUserId, sum(Score) as PostScore FROM posts_view WHERE OwnerUserID is not NULL GROUP BY OwnerUserId ORDER BY PostScore DESC LIMIT 10; 
+
+2.2.3: SELECT COUNT (DISTINCT OwnerUserId) as DistinctOwnerId FROM posts_view WHERE lower(Body) RLIKE '.cloud.' OR lower(Title) RLIKE '.cloud.'; 
+
+Task 4: CREATE VIEW top10_users AS (
+SELECT OwnerUserId, sum(Score) as PostScore FROM posts_view 
+WHERE OwnerUserID is not NULL GROUP BY OwnerUserId ORDER BY PostScore DESC LIMIT 10);
